@@ -14,7 +14,7 @@ subtest 'basic' => sub {
     is $apns->host_sandbox, 'gateway.sandbox.push.apple.com';
     is $apns->port, 2195;
     is $apns->max_payload_size, 256;
-    is $apns->command, 1;
+    is $apns->command, 2;
     is $apns->password, undef;
     is $apns->cert_file, 'xxx.cert';
     is $apns->key_file, 'yyy.key';

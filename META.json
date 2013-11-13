@@ -4,7 +4,7 @@
       "xaicron <xaicron {@} cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v0.5.6, CPAN::Meta::Converter version 2.131560",
+   "generated_by" : "Minilla/v0.6.5, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "perl_5"
    ],
@@ -59,18 +59,18 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/xaicron/p5-Net-APNs-Extended/issues"
+         "web" : "https://github.com/seagirl/p5-Net-APNs-Extended/issues"
       },
-      "homepage" : "https://github.com/xaicron/p5-Net-APNs-Extended",
+      "homepage" : "https://github.com/seagirl/p5-Net-APNs-Extended",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/xaicron/p5-Net-APNs-Extended.git",
-         "web" : "https://github.com/xaicron/p5-Net-APNs-Extended"
+         "url" : "git://github.com/seagirl/p5-Net-APNs-Extended",
+         "web" : "https://github.com/seagirl/p5-Net-APNs-Extended"
       }
    },
-   "version" : "0.07",
+   "version" : "0.08",
    "x_contributors" : [
       "Syohei YOSHIDA <syohex@gmail.com>",
-      "Yuji Shimada <xaicron@gmail.com>"
+      "xaicron <xaicron@gmail.com>"
    ]
 }

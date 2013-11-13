@@ -44,12 +44,12 @@ subtest 'success' => sub {
         [
             'device_tokenA',
             { aps => { alert => 'HelloA' } },
-            { identifier => 0, expiry => 0 },
+            { identifier => 0, expiry => 0, priority => 10 },
         ],
         [
             'device_tokenB',
             { aps => { alert => 'HelloB' } },
-            { identifier => 1, expiry => 0 },
+            { identifier => 1, expiry => 0, priority => 10 },
         ],
     ];
 };
@@ -71,12 +71,12 @@ subtest 'with extras' => sub {
         [
             'device_tokenA',
             { aps => { alert => 'HelloA' } },
-            { identifier => 200, expiry => 500 },
+            { identifier => 200, expiry => 500, priority => 10 },
         ],
         [ 
             'device_tokenB',
             { aps => { alert => 'HelloB' } },
-            { identifier => 100, expiry => 300 },
+            { identifier => 100, expiry => 300, priority => 10 },
         ],
     ];
     $apns->send_multi($datum);

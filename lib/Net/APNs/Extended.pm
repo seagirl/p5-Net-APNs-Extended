@@ -3,7 +3,7 @@ package Net::APNs::Extended;
 use strict;
 use warnings;
 use 5.008_001;
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use parent qw(Exporter Net::APNs::Extended::Base);
 use Carp qw(croak);
@@ -46,7 +46,7 @@ my %default = (
     is_sandbox       => 0,
     port             => 2195,
     max_payload_size => 256,
-    command          => 1,
+    command          => 2,
 );
 
 sub new {
@@ -62,6 +62,7 @@ sub send {
     $extra ||= {};
     $extra->{identifier} ||= 0;
     $extra->{expiry}     ||= 0;
+    $extra->{priority}   ||= 10;
     my $data = $self->_create_send_data($device_token, $payload, $extra) || return 0;
     return $self->_send($data) ? 1 : 0;
 }
@@ -80,6 +81,7 @@ sub send_multi {
         $extra ||= {};
         $extra->{identifier} ||= $i++;
         $extra->{expiry}     ||= 0;
+        $extra->{priority}   ||= 10;
         $data .= $self->_create_send_data($device_token, $payload, $extra);
     }
     return $self->_send($data) ? 1 : 0;
@@ -90,7 +92,8 @@ sub retrieve_error {
     my $data = $self->_read;
     return unless defined $data;
 
-    my ($command, $status, $identifier) = unpack 'C C L', $data;
+    # unpack のテンプレートを C C L から C C N に変更 by yoshizu (2013.09.24)
+    my ($command, $status, $identifier) = unpack 'C C N', $data;
     my $error = {
         command    => $command    || 8,
         status     => $status     || PROCESSING_ERROR,
@@ -126,14 +129,29 @@ sub _create_send_data {
         $json = $self->json->encode($payload);
     }
 
+    # チャンクの実装を Net-APNS-Persistent-0.02 から移植したものに変更 by yoshizu (2013.09.24)
+    # Net::APNs::Extended 0.07 の実装では動かなかったので…
     my $command = $self->command;
     if ($command == 0) {
-        $chunk = CORE::pack('C n/a* n/a*', $command, $device_token, $json);
+      $chunk = CORE::pack('c n/a* n/a*',
+        $command, CORE::pack( 'H*', $device_token ), $json
+      );
     }
     elsif ($command == 1) {
-        $chunk = CORE::pack('C L N n/a* n/a*',
-            $command, $extra->{identifier}, $extra->{expiry}, $device_token, $json,
-        );
+      $chunk = CORE::pack('c N N n/a* n/a*',
+        $command, $extra->{identifier}, $extra->{expiry}, CORE::pack( 'H*', $device_token ), $json,
+      );
+    }
+    # 新フォーマットを実装 by yoshizu (2013.11.13)
+    elsif ($command == 2) {
+      my $frame_data = CORE::pack('c n/a* c n/a* c n N c n N c n N',
+        1, CORE::pack( 'H*', $device_token ),
+        2, $json,
+        3, 4, $extra->{identifier},
+        4, 4, $extra->{expiry},
+        5, 1, $extra->{priority}
+      );
+      $chunk = CORE::pack('c N/a*', 2, $frame_data);
     }
     else {
         croak "command($command) not support. shuled be 0 or 1";

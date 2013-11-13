@@ -27,6 +27,7 @@ subtest 'success' => sub {
             is_deeply $extra, {
                 identifier => 0,
                 expiry     => 0,
+                priority   => 10,
             };
             return 'dummy';
         },
@@ -52,6 +53,7 @@ subtest 'with extra' => sub {
             is_deeply $extra, {
                 identifier => 12345,
                 expiry     => 56789,
+                priority   => 10,
             };
             return 'dummy';
         },

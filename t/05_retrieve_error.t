@@ -9,7 +9,7 @@ my $apns = Net::APNs::Extended->new(cert => 'xxx');
 subtest 'basic' => sub {
     my $guard = mock_guard $apns => {
         _read => sub {
-            pack 'C C L', 8, 8, 12345;
+            pack 'C C N', 8, 8, 12345;
         },
         disconnect => 1,
     };
@@ -25,7 +25,7 @@ subtest 'basic' => sub {
 subtest 'backward compatibility' => sub {
     my $guard = mock_guard $apns => {
         _read => sub {
-            pack 'C C L', 8, 8, 12345;
+            pack 'C C N', 8, 8, 12345;
         },
         disconnect => 1,
     };
