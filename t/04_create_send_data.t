@@ -19,7 +19,7 @@ subtest '[command 2] success' => sub {
     my ($command, $frame_data) = unpack 'c N/a*' => $chunk;
     my ($item_number1, $device_token, $item_number2, $json, $item_number3, $identifier_length, $identifier,
         $item_number4, $expiry_length, $expiry, $item_number5, $priority_length, $priority)
-        = unpack 'c n/a* c n/a* c n N c n N c n N' => $frame_data;
+        = unpack 'c n/A* c n/A* c n N c n N c n c' => $frame_data;
     $device_token = unpack('H*', $device_token);
 
     is $command, 2;
@@ -40,7 +40,7 @@ subtest '[command 2] with extras' => sub {
     my ($command, $frame_data) = unpack 'c N/a*' => $chunk;
     my ($item_number1, $device_token, $item_number2, $json, $item_number3, $identifier_length, $identifier,
         $item_number4, $expiry_length, $expiry, $item_number5, $priority_length, $priority)
-        = unpack 'c n/a* c n/a* c n N c n N c n N' => $frame_data;
+        = unpack 'c n/A* c n/A* c n N c n N c n c' => $frame_data;
     $device_token = unpack('H*', $device_token);
 
     is $command, 2;
@@ -59,7 +59,7 @@ subtest '[command 1] success' => sub {
         aps => { alert => 'メッセージ' },
     }, { identifier => 0, expiry => 0 });
     my ($command, $identifier, $expiry, $device_token, $json)
-        = unpack 'c N N n/a* n/a*' => $chunk;
+        = unpack 'c N N n/A* n/A*' => $chunk;
     $device_token = unpack('H*', $device_token);
 
     is $command, 1;
@@ -77,7 +77,7 @@ subtest '[command 1] with extras' => sub {
         aps => { alert => 'メッセージ' },
     }, { identifier => 12345, expiry => 56789 });
     my ($command, $identifier, $expiry, $device_token, $json)
-        = unpack 'c N N n/a* n/a*' => $chunk;
+        = unpack 'c N N n/A* n/A*' => $chunk;
     $device_token = unpack('H*', $device_token);
 
     is $command, 1;
@@ -95,7 +95,7 @@ subtest '[command 1] trimed' => sub {
         aps => { alert => 'メッセージ'x100 },
     }, { identifier => 12345, expiry => 56789 });
     my ($command, $identifier, $expiry, $device_token, $json)
-        = unpack 'c N N n/a* n/a*' => $chunk;
+        = unpack 'c N N n/A* n/A*' => $chunk;
     $device_token = unpack('H*', $device_token);
 
     is $command, 1;
@@ -113,7 +113,7 @@ subtest '[command 1] badge to numify' => sub {
         aps => { alert => 'メッセージ', badge => '100' },
     }, { identifier => 12345, expiry => 56789 });
     my ($command, $identifier, $expiry, $device_token, $json)
-        = unpack 'c N N n/a* n/a*' => $chunk;
+        = unpack 'c N N n/A* n/A*' => $chunk;
     $device_token = unpack('H*', $device_token);
 
     is $command, 1;
@@ -131,7 +131,7 @@ subtest '[command 1] trimd alter.body' => sub {
         aps => { alert => { body => 'メッセージ'x100 }, badge => '100' },
     }, { identifier => 12345, expiry => 56789 });
     my ($command, $identifier, $expiry, $device_token, $json)
-        = unpack 'c N N n/a* n/a*' => $chunk;
+        = unpack 'c N N n/A* n/A*' => $chunk;
     $device_token = unpack('H*', $device_token);
 
     is $command, 1;

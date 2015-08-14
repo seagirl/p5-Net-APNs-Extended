@@ -3,7 +3,7 @@ package Net::APNs::Extended;
 use strict;
 use warnings;
 use 5.008_001;
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use parent qw(Exporter Net::APNs::Extended::Base);
 use Carp qw(croak);
@@ -133,28 +133,39 @@ sub _create_send_data {
     # Net::APNs::Extended 0.07 の実装では動かなかったので…
     my $command = $self->command;
     if ($command == 0) {
-      $chunk = CORE::pack('c n/a* n/a*',
-        $command, CORE::pack( 'H*', $device_token ), $json
-      );
+      $chunk
+        = CORE::pack('c',  0)
+        . CORE::pack('n',  32)
+        . CORE::pack('H*', $device_token)
+        . CORE::pack('n',  length($json))
+        . CORE::pack('A*',  $json);
     }
     elsif ($command == 1) {
-      $chunk = CORE::pack('c N N n/a* n/a*',
-        $command, $extra->{identifier}, $extra->{expiry}, CORE::pack( 'H*', $device_token ), $json,
-      );
+      $chunk
+        = CORE::pack('c',  1)
+        . CORE::pack('N',  $extra->{identifier})
+        . CORE::pack('N',  $extra->{expiry})
+        . CORE::pack('n',  32)
+        . CORE::pack('H*', $device_token)
+        . CORE::pack('n',  length($json))
+        . CORE::pack('A*',  $json);
     }
     # 新フォーマットを実装 by yoshizu (2013.11.13)
     elsif ($command == 2) {
-      my $frame_data = CORE::pack('c n/a* c n/a* c n N c n N c n N',
-        1, CORE::pack( 'H*', $device_token ),
-        2, $json,
-        3, 4, $extra->{identifier},
-        4, 4, $extra->{expiry},
-        5, 1, $extra->{priority}
-      );
-      $chunk = CORE::pack('c N/a*', 2, $frame_data);
+      my $frame_data
+        = CORE::pack('c',  1) . CORE::pack('n',  32)            . CORE::pack('H*', $device_token)        # Device token
+        . CORE::pack('c',  2) . CORE::pack('n',  length($json)) . CORE::pack('A*', $json)                # Payload
+        . CORE::pack('c',  3) . CORE::pack('n',  4)             . CORE::pack('N',  $extra->{identifier}) # Notification identifier
+        . CORE::pack('c',  4) . CORE::pack('n',  4)             . CORE::pack('N',  $extra->{expiry})     # Expiration date
+        . CORE::pack('c',  5) . CORE::pack('n',  1)             . CORE::pack('c',  $extra->{priority});  # Priority
+
+      $chunk
+        = CORE::pack('c', 2) 
+        . CORE::pack('N', length($frame_data))
+        . $frame_data;
     }
     else {
-        croak "command($command) not support. shuled be 0 or 1";
+        croak "command($command) not support. shuled be 0 or 1 or 2";
     }
 
     return $chunk;
