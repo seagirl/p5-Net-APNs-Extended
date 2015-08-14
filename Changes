@@ -2,6 +2,9 @@ Revision history for Perl extension Net::APNs::Extended
 
 {{$NEXT}}
 
+0.09 2015-08-14T18:17:58Z
+    - fixed new The Binary Interface and Notification Format
+
 0.08 2013-11-13T17:42:58Z
     - impl new The Binary Interface and Notification Format
     - fixed Legacy Format (both Simple Notification Format and Enhanced Notification Format)
