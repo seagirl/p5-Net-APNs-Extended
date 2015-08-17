@@ -27,13 +27,15 @@ __PACKAGE__->mk_accessors(qw[
     key
     key_type
     read_timeout
+    write_timeout
     json
 ]);
 
 my %default = (
-    cert_type    => Net::SSLeay::FILETYPE_PEM(),
-    key_type     => Net::SSLeay::FILETYPE_PEM(),
-    read_timeout => 3,
+    cert_type     => Net::SSLeay::FILETYPE_PEM(),
+    key_type      => Net::SSLeay::FILETYPE_PEM(),
+    read_timeout  => 3,
+    write_timeout => undef,
 );
 
 sub new {
@@ -78,7 +80,7 @@ sub _create_socket {
     socket(my $sock, PF_INET, SOCK_STREAM, 0) or die "can't create socket: $!";
     my $sock_addr = do {
         my $iaddr = inet_aton($self->hostname)
-            or die sprintf "can't create iaddr from %s: %s", $self->hostname, $!;
+            or die sprintf "can't create iaddr from %s", $self->hostname;
         pack_sockaddr_in $self->port, $iaddr or die "can't create sock_addr: $!";
     };
     CORE::connect($sock, $sock_addr) or die "can't connect socket: $!";
@@ -162,42 +164,57 @@ sub _send {
     my $self = shift;
     my $data = \$_[0];
     my ($sock, $ctx, $ssl) = @{$self->_connect};
-    Net::SSLeay::ssl_write_all($ssl, $data) or _die_if_ssl_error("ssl_write_all error: $!");
 
+    return unless $self->_do_select($sock, 'write', $self->write_timeout);
+
+    Net::SSLeay::ssl_write_all($ssl, $data) or _die_if_ssl_error("ssl_write_all error: $!");
     return 1;
 }
 
 sub _read {
     my $self = shift;
-
-    my $begin_time = Time::HiRes::time();
-    my $timeout = $self->read_timeout;
-
     my ($sock, $ctx, $ssl) = @{$self->_connect};
 
-    my $data;
+    return unless $self->_do_select($sock, 'read', $self->read_timeout);
+
+    my $data = Net::SSLeay::ssl_read_all($ssl) or _die_if_ssl_error("ssl_read_all error: $!");
+    return $data;
+}
+
+sub _do_select {
+    my ($self, $sock, $act, $timeout) = @_;
+
+    my $begin_time = Time::HiRes::time();
+
+    vec(my $bits = '', fileno($sock), 1) = 1;
     while (1) {
-        vec(my $rin = '', fileno($sock), 1) = 1;
-        my $nfound = select($rin, undef, undef, $timeout);
+        my $nfound;
+        if ($act eq 'read') {
+            $nfound = select my $rout = $bits, undef, undef, $timeout;
+        }
+        else {
+            $nfound = select undef, my $wout = $bits, undef, $timeout;
+        }
         return unless $nfound; # timeout
 
         # returned error
         if ($nfound == -1) {
             if ($! == EINTR) {
                 # can retry
-                $timeout -= ($begin_time - Time::HiRes::time());
+                $timeout -= (Time::HiRes::time() - $begin_time) if defined $timeout;
                 next;
             }
-
-            $self->disconnect;
-            return;
+            else {
+                # other error
+                $self->disconnect;
+                return;
+            }
         }
 
-        $data = Net::SSLeay::ssl_read_all($ssl) or _die_if_ssl_error("ssl_read_all error: $!");
         last;
     }
 
-    return $data;
+    return 1;
 }
 
 sub DESTROY {
@@ -208,7 +225,7 @@ sub DESTROY {
 sub _tmpfile {
     my $fh = File::Temp->new(
         TEMPLATE => "napnseXXXXXXXXXXX",
-        TEMPDIR  => 1,
+        TMPDIR   => 1,
         EXLOCK   => 0,
     );
     syswrite $fh, $_[0];

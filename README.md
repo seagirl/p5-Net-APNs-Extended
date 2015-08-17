@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/xaicron/p5-Net-APNs-Extended.svg?branch=master)](https://travis-ci.org/xaicron/p5-Net-APNs-Extended)
 # NAME
 
 Net::APNs::Extended - Client library for APNs that support the extended format.
@@ -62,12 +63,16 @@ Supported arguments are:
 
     Sets read timeout.
 
+- write\_timeout : Num
+
+    Sets write timeout.
+
 ## $apns->send($device\_token, $payload \[, $extra \])
 
 Send notification for APNs.
 
     $apns->send($device_token, {
-        apns => {
+        aps => {
             alert => "Hello, APNs!",
             badge => 1,
             sound => "default",

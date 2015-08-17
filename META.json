@@ -4,7 +4,7 @@
       "xaicron <xaicron {@} cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v2.5.0, CPAN::Meta::Converter version 2.150005",
+   "generated_by" : "Minilla/v2.4.1, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "perl_5"
    ],
@@ -68,11 +68,11 @@
          "web" : "https://github.com/seagirl/p5-Net-APNs-Extended"
       }
    },
-   "version" : "0.09",
+   "version" : "0.11",
    "x_contributors" : [
       "Syohei YOSHIDA <syohex@gmail.com>",
-      "xaicron <xaicron@gmail.com>",
-      "Takuho Yoshizu <yoshizu@s2factory.co.jp>"
+      "Colin Kuskie <colink@perldreamer.com>",
+      "xaicron <xaicron@gmail.com>"
    ],
-   "x_serialization_backend" : "JSON::PP version 2.27202"
+   "x_serialization_backend" : "JSON::PP version 2.27300"
 }
